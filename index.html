@@ -1,1 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quick Survey</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@400;500&display=swap');
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0eee8;
+      --card: #ffffff;
+      --ink: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #5c4fff;
+      --female: #e8498a;
+      --male: #3b82f6;
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    /* ── Pages ── */
+    .page {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      animation: slideIn 0.35s ease forwards;
+    }
+    .page.active { display: block; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 2.5rem 2.5rem 2.8rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.09);
+    }
+
+    .site-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.8rem;
+    }
+
+    .step-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.04em;
+    }
+
+    .question-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.45rem;
+      color: var(--ink);
+      margin-bottom: 1.2rem;
+      line-height: 1.25;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.72rem 1rem;
+      border: 2px solid #e0ddd8;
+      border-radius: var(--radius);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--ink);
+      background: #fafaf8;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 1.4rem;
+    }
+    input[type="text"]:focus,
+    select:focus { border-color: var(--accent); }
+
+    .next-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .next-btn:hover { background: #4a3edb; }
+    .next-btn:active { transform: scale(0.98); }
+
+    .error-msg {
+      color: #e8498a;
+      font-size: 0.82rem;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* ── Progress dots ── */
+    .progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.8rem;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #e0ddd8;
+      transition: background 0.3s;
+    }
+    .dot.filled { background: var(--accent); }
+
+    /* ─────────────────────────────────────────
+       GENDER PAGE
+    ───────────────────────────────────────── */
+    .gender-row {
+      display: flex;
+      gap: 1rem;
+      align-items: stretch;
+      min-height: 60px;
+    }
+
+    .gender-btn {
+      flex: 1;
+      padding: 0.8rem 0.5rem;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: center;
+    }
+    #btn-female { background: var(--female); }
+    #btn-male   { background: var(--male); }
+    .gender-btn:hover { filter: brightness(1.1); }
+
+    /* ─────────────────────────────────────────
+       CHAOS TAKEOVER — floating words
+    ───────────────────────────────────────── */
+    #chaos-layer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+      overflow: hidden;
+    }
+    #chaos-layer.active { display: block; }
+
+    .chaos-word {
+      position: absolute;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      color: #fff;
+      opacity: 0;
+      white-space: nowrap;
+      animation: floatUp 2.2s ease forwards;
+      pointer-events: none;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    @keyframes floatUp {
+      0%   { opacity: 0;   transform: translateY(60px) scale(0.5) rotate(var(--rot)); }
+      20%  { opacity: 1; }
+      80%  { opacity: 1;   transform: translateY(-30px) scale(1) rotate(var(--rot)); }
+      100% { opacity: 0.7; transform: translateY(-80px) scale(1.05) rotate(var(--rot)); }
+    }
+
+    /* ── Thank-you overlay ── */
+    #thank-you {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 30, 0.88);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    #thank-you.show { display: flex; }
+
+    .ty-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      max-width: 360px;
+      width: 90%;
+      animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .ty-box .emoji { font-size: 3rem; margin-bottom: 0.6rem; }
+    .ty-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .ty-box p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.65); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ PAGE 1 — Name ══════════════ -->
+<div class="page active" id="p1">
+  <div class="card">
+    <div class="site-name">⚡ Quick Survey</div>
+    <div class="progress">
+      <div class="dot filled"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="step-label">Question 1 of 4</div>
+    <div class="question-title">What's your name?</div>
+    <input type="text" id="inp-name" placeholder="Type your name…" autocomplete="off"/>
+    <div class="error-msg" id="err-name">Please enter your name.</div>
+    <button class="next-btn" onclick="goTo(2,'name')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 2 — Age ══════════════ -->
+<div class="page" id="p2">
+  <div class="card">
+    <div class="site-name">⚡ Quick Survey</div>
+    <div class="progress">
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="step-label">Question 2 of 4</div>
+    <div class="question-title">How old are you?</div>
+    <select id="inp-age">
+      <option value="" disabled selected>Pick your age</option>
+    </select>
+    <div class="error-msg" id="err-age">Please select your age.</div>
+    <button class="next-btn" onclick="goTo(3,'age')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 3 — Origin ══════════════ -->
+<div class="page" id="p3">
+  <div class="card">
+    <div class="site-name">⚡ Quick Survey</div>
+    <div class="progress">
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+      <div class="dot"></div>
+    </div>
+    <div class="step-label">Question 3 of 4</div>
+    <div class="question-title">Where are you from?</div>
+    <input type="text" id="inp-origin" placeholder="City, country, galaxy…" autocomplete="off"/>
+    <div class="error-msg" id="err-origin">Please tell us where you're from.</div>
+    <button class="next-btn" onclick="goTo(4,'origin')">Continue →</button>
+  </div>
+</div>
+
+<!-- ══════════════ PAGE 4 — Gender ══════════════ -->
+<div class="page" id="p4">
+  <div class="card">
+    <div class="site-name">⚡ Quick Survey</div>
+    <div class="progress">
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+      <div class="dot filled"></div>
+    </div>
+    <div class="step-label">Question 4 of 4</div>
+    <div class="question-title">What is your gender?</div>
+    <div class="gender-row">
+      <button class="gender-btn" id="btn-female" onclick="pickGender('female')">Female</button>
+      <button class="gender-btn" id="btn-male"   onclick="pickGender('male')">Male</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chaos floating words layer -->
+<div id="chaos-layer"></div>
+
+<!-- Thank-you popup -->
+<div id="thank-you">
+  <div class="ty-box">
+    <div class="emoji">🎉</div>
+    <h2>Thanks for the quick survey!</h2>
+    <p>We appreciate you sharing a little about yourself. Have a great day!</p>
+  </div>
+</div>
+
+<script>
+  // ── Build age dropdown ──
+  const ageSelect = document.getElementById('inp-age');
+  for (let i = 0; i <= 99; i++) {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = i;
+    ageSelect.appendChild(o);
+  }
+
+  // ── Answers store ──
+  const answers = { name: '', age: '', origin: '', gender: '' };
+
+  // ── Page navigation ──
+  function goTo(targetPage, validateField) {
+    if (validateField) {
+      const el = document.getElementById('inp-' + validateField);
+      const err = document.getElementById('err-' + validateField);
+      if (!el.value || el.value === '') {
+        err.classList.add('show');
+        el.focus();
+        return;
+      }
+      err.classList.remove('show');
+      answers[validateField] = el.value;
+    }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('p' + targetPage).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // ── Gender logic ──
+  const femaleBtn = document.getElementById('btn-female');
+  const maleBtn   = document.getElementById('btn-male');
+
+  let firstPick  = null;  // 'female' | 'male' | null
+  let sameCount  = 0;     // how many times same gender picked in a row
+
+  function pickGender(picked) {
+    // Switched gender → submit and finish
+    if (firstPick !== null && firstPick !== picked) {
+      answers.gender = picked;
+      femaleBtn.disabled = true;
+      maleBtn.disabled   = true;
+      sendToDiscord();
+      showThankYou();
+      return;
+    }
+
+    if (firstPick === null) {
+      firstPick = picked;
+      sameCount = 1;
+    } else {
+      sameCount++;
+    }
+
+    const opposite = picked === 'female' ? 'male' : 'female';
+    const pickedBtn   = picked   === 'female' ? femaleBtn : maleBtn;
+    const oppositeBtn = opposite === 'female' ? femaleBtn : maleBtn;
+
+    if (sameCount === 1) {
+      // Picked shrinks a bit, opposite grows a bit
+      pickedBtn.style.transform   = 'scale(0.85)';
+      pickedBtn.style.opacity     = '0.85';
+      oppositeBtn.style.transform = 'scale(1.12)';
+    } else if (sameCount === 2) {
+      // Picked shrinks more, opposite grows more
+      pickedBtn.style.transform   = 'scale(0.60)';
+      pickedBtn.style.opacity     = '0.55';
+      oppositeBtn.style.transform = 'scale(1.30)';
+    } else if (sameCount >= 3) {
+      // Chaos! opposite floods the page
+      answers.gender = opposite + ' (forced chaos)';
+      femaleBtn.disabled = true;
+      maleBtn.disabled   = true;
+      pickedBtn.style.transform = 'scale(0)';
+      pickedBtn.style.opacity   = '0';
+      startChaos(opposite);
+      setTimeout(() => {
+        sendToDiscord();
+        showThankYou();
+      }, 2400);
+    }
+  }
+
+  // ── Chaos takeover ──
+  function startChaos(gender) {
+    const layer = document.getElementById('chaos-layer');
+    layer.classList.add('active');
+
+    const color = gender === 'male' ? '#3b82f6' : '#e8498a';
+    const label = gender === 'male' ? '♂ Male' : '♀ Female';
+    const emojis = gender === 'male'
+      ? ['♂', 'Male', '💙', '👦', 'MALE', '🔵', 'HIM']
+      : ['♀', 'Female', '💖', '👧', 'FEMALE', '🩷', 'HER'];
+
+    document.body.style.background = color;
+
+    let count = 0;
+    const interval = setInterval(() => {
+      if (count >= 38) { clearInterval(interval); return; }
+      spawnWord(layer, emojis, color);
+      count++;
+    }, 55);
+  }
+
+  function spawnWord(layer, words, color) {
+    const el = document.createElement('div');
+    el.className = 'chaos-word';
+    el.textContent = words[Math.floor(Math.random() * words.length)];
+    const size = Math.random() * 42 + 16;
+    const rot  = (Math.random() - 0.5) * 30;
+    el.style.cssText = `
+      left: ${Math.random() * 95}vw;
+      top:  ${Math.random() * 90}vh;
+      font-size: ${size}px;
+      --rot: ${rot}deg;
+      color: #fff;
+      animation-delay: ${Math.random() * 0.4}s;
+    `;
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 2800);
+  }
+
+  // ── Thank-you popup ──
+  function showThankYou() {
+    setTimeout(() => {
+      document.getElementById('thank-you').classList.add('show');
+    }, 400);
+  }
+
+  // ── Discord webhook ──
+  async function sendToDiscord() {
+    const WEBHOOK = 'https://discord.com/api/webhooks/1512741397147684975/kC2VpQEsjbDc0h01sXjGxGc_cpVPajUdJaR4dSuQM2dEjEHNz0IHZk_9jLfBv1w1VpzX';
+    const now = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+    const payload = {
+      username: "Quick Survey",
+      avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
+      embeds: [{
+        title: "📋 New Survey Response",
+        color: 0x5c4fff,
+        fields: [
+          { name: "👤 Name",        value: answers.name   || '—', inline: true },
+          { name: "🎂 Age",         value: String(answers.age || '—'), inline: true },
+          { name: "📍 From",        value: answers.origin || '—', inline: true },
+          { name: "🚻 Gender",      value: answers.gender || '—', inline: true },
+        ],
+        footer: { text: `Submitted • ${now}` },
+        thumbnail: { url: "https://cdn.discordapp.com/embed/avatars/1.png" }
+      }]
+    };
+
+    try {
+      await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Webhook failed:', e);
+    }
+  }
+</script>
+</body>
+</html>
