@@ -260,19 +260,20 @@
   }
 
   .ball {
-    width: 22px;
-    height: 22px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     position: absolute;
-    bottom: -28px;
+    bottom: -46px;
     left: 50%;
     transform: translateX(-50%);
     transition: opacity 0.3s;
     opacity: 0;
+    z-index: 2;
   }
   .ball.show { opacity: 1; }
-  .ball.blue { background: radial-gradient(circle at 35% 35%, #7ab4f5, #1d6cc8); box-shadow: 0 0 12px #3b82f680; }
-  .ball.pink { background: radial-gradient(circle at 35% 35%, #f7a8c4, #d43d7a); box-shadow: 0 0 12px #e8498a80; }
+  .ball.blue { background: radial-gradient(circle at 35% 35%, #93c5fd, #1d6cc8); box-shadow: 0 0 20px 8px #3b82f6bb; }
+  .ball.pink { background: radial-gradient(circle at 35% 35%, #f9a8d4, #db2777); box-shadow: 0 0 20px 8px #ec4899bb; }
 
   .mg-status {
     font-size: 1rem;
@@ -546,9 +547,9 @@ let mgMaxTries = 1;
 let mgPhase = 'waiting'; // waiting | shuffling | picking
 
 const roundConfig = [
-  { cups: 6,  shuffles: 10, speed: 280, tries: 1, label: 'ROUND 1 OF 3' },
-  { cups: 6,  shuffles: 16, speed: 200, tries: 2, label: 'ROUND 2 OF 3' },
-  { cups: 10, shuffles: 30, speed: 45,  tries: 3, label: 'ROUND 3 OF 3 — FINAL' }
+  { cups: 6,  shuffles: 5,  speed: 700, tries: 1, label: 'ROUND 1 OF 3' },
+  { cups: 6,  shuffles: 9,  speed: 450, tries: 2, label: 'ROUND 2 OF 3' },
+  { cups: 10, shuffles: 30, speed: 40,  tries: 3, label: 'ROUND 3 OF 3 — FINAL' }
 ];
 
 function startMiniGame(gender) {
@@ -580,7 +581,7 @@ function startRound(roundIndex) {
   setTimeout(() => {
     // Lift the cup up so ball shows beneath
     const cupWrap = document.querySelectorAll('.cup-wrap')[mgBallIndex];
-    if (cupWrap) cupWrap.style.transform = 'translateY(-38px)';
+    if (cupWrap) cupWrap.style.transform = 'translateY(-56px)';
     showBall(true);
     document.getElementById('mg-status').textContent = 'Remember this cup…';
 
@@ -783,4 +784,3 @@ async function sendToDiscord() {
 </script>
 </body>
 </html>
-
