@@ -1,487 +1,786 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quick Survey</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@400;500&display=swap');
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Survey</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg: #f0eee8;
-      --card: #ffffff;
-      --ink: #1a1a1a;
-      --muted: #6b6b6b;
-      --accent: #5c4fff;
-      --female: #e8498a;
-      --male: #3b82f6;
-      --radius: 14px;
-    }
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --border: #2a2a2a;
+    --ink: #f0f0f0;
+    --muted: #888;
+    --accent: #f0f0f0;
+    --radius: 12px;
+  }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      overflow-x: hidden;
-    }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
 
-    /* ── Pages ── */
-    .page {
-      display: none;
-      width: 100%;
-      max-width: 480px;
-      animation: slideIn 0.35s ease forwards;
-    }
-    .page.active { display: block; }
+  .page { display: none; width: 100%; max-width: 460px; }
+  .page.active { display: block; animation: fadeUp 0.3s ease forwards; }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-    /* ── Card ── */
-    .card {
-      background: var(--card);
-      border-radius: 24px;
-      padding: 2.5rem 2.5rem 2.8rem;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.09);
-    }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+  }
 
-    .site-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.8rem;
-    }
+  .step-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
 
-    .step-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-weight: 500;
-      margin-bottom: 0.35rem;
-      letter-spacing: 0.04em;
-    }
+  .question-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1.6rem;
+    line-height: 1.3;
+  }
 
-    .question-title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 1.45rem;
-      color: var(--ink);
-      margin-bottom: 1.2rem;
-      line-height: 1.25;
-    }
+  /* Progress bar */
+  .progress-bar {
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #f0f0f0;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
 
-    input[type="text"],
-    select {
-      width: 100%;
-      padding: 0.72rem 1rem;
-      border: 2px solid #e0ddd8;
-      border-radius: var(--radius);
-      font-family: 'Inter', sans-serif;
-      font-size: 1rem;
-      color: var(--ink);
-      background: #fafaf8;
-      outline: none;
-      transition: border-color 0.2s;
-      margin-bottom: 1.4rem;
-    }
-    input[type="text"]:focus,
-    select:focus { border-color: var(--accent); }
+  input[type="text"], select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    margin-bottom: 1.2rem;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus, select:focus { border-color: #555; }
+  select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+  select option { background: #141414; color: #f0f0f0; }
 
-    .next-btn {
-      width: 100%;
-      padding: 0.8rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-    .next-btn:hover { background: #4a3edb; }
-    .next-btn:active { transform: scale(0.98); }
+  .next-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: #f0f0f0;
+    color: #0a0a0a;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .next-btn:hover { background: #d8d8d8; }
+  .next-btn:active { transform: scale(0.98); }
 
-    .error-msg {
-      color: #e8498a;
-      font-size: 0.82rem;
-      margin-top: -1rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .error-msg.show { display: block; }
+  .error-msg {
+    color: #aaa;
+    font-size: 0.8rem;
+    margin-top: -0.9rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .error-msg.show { display: block; }
 
-    /* ── Progress dots ── */
-    .progress {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 1.8rem;
-    }
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #e0ddd8;
-      transition: background 0.3s;
-    }
-    .dot.filled { background: var(--accent); }
+  /* Gender buttons */
+  .gender-row { display: flex; gap: 1rem; margin-bottom: 0; }
+  .gender-btn {
+    flex: 1;
+    padding: 1rem;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gender-btn:hover { border-color: #555; background: #1a1a1a; }
 
-    /* ─────────────────────────────────────────
-       GENDER PAGE
-    ───────────────────────────────────────── */
-    .gender-row {
-      display: flex;
-      gap: 1rem;
-      align-items: stretch;
-      min-height: 60px;
-    }
+  /* Are you sure overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .overlay.show { display: flex; }
+  .overlay-box {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    animation: fadeUp 0.3s ease forwards;
+  }
+  .overlay-box h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    margin-bottom: 0.5rem;
+  }
+  .overlay-box p { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .overlay-row { display: flex; gap: 0.8rem; }
+  .overlay-row button {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: var(--radius);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .btn-confirm { background: #f0f0f0; color: #0a0a0a; }
+  .btn-cancel  { background: transparent; color: #888; }
+  .btn-confirm:hover { background: #d8d8d8; }
+  .btn-cancel:hover { color: #f0f0f0; }
 
-    .gender-btn {
-      flex: 1;
-      padding: 0.8rem 0.5rem;
-      border: none;
-      border-radius: var(--radius);
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1.05rem;
-      cursor: pointer;
-      color: #fff;
-      transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-      transform-origin: center;
-    }
-    #btn-female { background: var(--female); }
-    #btn-male   { background: var(--male); }
-    .gender-btn:hover { filter: brightness(1.1); }
+  /* ── Cup Shuffle Mini-game ── */
+  #minigame {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    align-items: center;
+    justify-content: center;
+    z-index: 80;
+    flex-direction: column;
+    padding: 2rem;
+  }
+  #minigame.show { display: flex; }
 
-    /* ─────────────────────────────────────────
-       CHAOS TAKEOVER — floating words
-    ───────────────────────────────────────── */
-    #chaos-layer {
-      display: none;
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 60;
-      overflow: hidden;
-    }
-    #chaos-layer.active { display: block; }
+  .mg-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    margin-bottom: 0.4rem;
+    text-align: center;
+  }
+  .mg-sub {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .mg-round-label {
+    font-size: 0.72rem;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
 
-    .chaos-word {
-      position: absolute;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      color: #fff;
-      opacity: 0;
-      white-space: nowrap;
-      animation: floatUp 2.2s ease forwards;
-      pointer-events: none;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.18);
-    }
-    @keyframes floatUp {
-      0%   { opacity: 0;   transform: translateY(60px) scale(0.5) rotate(var(--rot)); }
-      20%  { opacity: 1; }
-      80%  { opacity: 1;   transform: translateY(-30px) scale(1) rotate(var(--rot)); }
-      100% { opacity: 0.7; transform: translateY(-80px) scale(1.05) rotate(var(--rot)); }
-    }
+  .cups-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
 
-    /* ── Thank-you overlay ── */
-    #thank-you {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 8, 30, 0.88);
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-    #thank-you.show { display: flex; }
+  .cup-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.35s ease;
+    position: relative;
+    width: 64px;
+  }
+  .cup-wrap:hover .cup-body { border-color: #555; }
 
-    .ty-box {
-      background: #fff;
-      border-radius: 24px;
-      padding: 3rem 2.5rem;
-      text-align: center;
-      max-width: 360px;
-      width: 90%;
-      animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    .ty-box .emoji { font-size: 3rem; margin-bottom: 0.6rem; }
-    .ty-box h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.55rem;
-      font-weight: 800;
-      color: var(--ink);
-      margin-bottom: 0.5rem;
-    }
-    .ty-box p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+  .cup-body {
+    width: 52px;
+    height: 64px;
+    border: 2px solid #2a2a2a;
+    border-radius: 4px 4px 10px 10px;
+    background: #141414;
+    position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+    clip-path: polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%);
+  }
+  .cup-top {
+    width: 62px;
+    height: 10px;
+    background: #1e1e1e;
+    border: 2px solid #2a2a2a;
+    border-radius: 4px;
+    margin-bottom: -2px;
+  }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.65); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-  </style>
+  .ball {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.3s;
+    opacity: 0;
+  }
+  .ball.show { opacity: 1; }
+  .ball.blue { background: radial-gradient(circle at 35% 35%, #7ab4f5, #1d6cc8); box-shadow: 0 0 12px #3b82f680; }
+  .ball.pink { background: radial-gradient(circle at 35% 35%, #f7a8c4, #d43d7a); box-shadow: 0 0 12px #e8498a80; }
+
+  .mg-status {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    min-height: 1.4rem;
+  }
+
+  .mg-tries {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .try-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #2a2a2a;
+  }
+  .try-dot.used { background: #555; }
+
+  /* Thank you */
+  #thankyou {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  #thankyou.show { display: flex; }
+  .ty-box {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    animation: fadeUp 0.4s ease forwards;
+  }
+  .ty-box .ty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .ty-box h2 { font-size: 1.4rem; font-weight: 700; color: #f0f0f0; margin-bottom: 0.5rem; }
+  .ty-box p { color: #666; font-size: 0.88rem; line-height: 1.6; }
+</style>
 </head>
 <body>
 
-<!-- ══════════════ PAGE 1 — Name ══════════════ -->
+<!-- PAGE 1: Name -->
 <div class="page active" id="p1">
   <div class="card">
-    <div class="site-name">⚡ Quick Survey</div>
-    <div class="progress">
-      <div class="dot filled"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-    <div class="step-label">Question 1 of 4</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+    <div class="step-label">1 of 5</div>
     <div class="question-title">What's your name?</div>
-    <input type="text" id="inp-name" placeholder="Type your name…" autocomplete="off"/>
+    <input type="text" id="inp-name" placeholder="Enter your name…" autocomplete="off"/>
     <div class="error-msg" id="err-name">Please enter your name.</div>
-    <button class="next-btn" onclick="goTo(2,'name')">Continue →</button>
+    <button class="next-btn" onclick="goTo(2,'name')">Continue</button>
   </div>
 </div>
 
-<!-- ══════════════ PAGE 2 — Age ══════════════ -->
+<!-- PAGE 2: Age -->
 <div class="page" id="p2">
   <div class="card">
-    <div class="site-name">⚡ Quick Survey</div>
-    <div class="progress">
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-    </div>
-    <div class="step-label">Question 2 of 4</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+    <div class="step-label">2 of 5</div>
     <div class="question-title">How old are you?</div>
     <select id="inp-age">
-      <option value="" disabled selected>Pick your age</option>
+      <option value="" disabled selected>Select your age</option>
     </select>
     <div class="error-msg" id="err-age">Please select your age.</div>
-    <button class="next-btn" onclick="goTo(3,'age')">Continue →</button>
+    <button class="next-btn" onclick="goTo(3,'age')">Continue</button>
   </div>
 </div>
 
-<!-- ══════════════ PAGE 3 — Origin ══════════════ -->
+<!-- PAGE 3: Country -->
 <div class="page" id="p3">
   <div class="card">
-    <div class="site-name">⚡ Quick Survey</div>
-    <div class="progress">
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-      <div class="dot"></div>
-    </div>
-    <div class="step-label">Question 3 of 4</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    <div class="step-label">3 of 5</div>
     <div class="question-title">Where are you from?</div>
-    <input type="text" id="inp-origin" placeholder="City, country, galaxy…" autocomplete="off"/>
-    <div class="error-msg" id="err-origin">Please tell us where you're from.</div>
-    <button class="next-btn" onclick="goTo(4,'origin')">Continue →</button>
+    <select id="inp-country">
+      <option value="" disabled selected>Select your country</option>
+    </select>
+    <div class="error-msg" id="err-country">Please select your country.</div>
+    <button class="next-btn" onclick="goTo(4,'country')">Continue</button>
   </div>
 </div>
 
-<!-- ══════════════ PAGE 4 — Gender ══════════════ -->
+<!-- PAGE 4: Gender -->
 <div class="page" id="p4">
   <div class="card">
-    <div class="site-name">⚡ Quick Survey</div>
-    <div class="progress">
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-      <div class="dot filled"></div>
-    </div>
-    <div class="step-label">Question 4 of 4</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+    <div class="step-label">4 of 5</div>
     <div class="question-title">What is your gender?</div>
     <div class="gender-row">
-      <button class="gender-btn" id="btn-female" onclick="pickGender('female')">Female</button>
-      <button class="gender-btn" id="btn-male"   onclick="pickGender('male')">Male</button>
+      <button class="gender-btn" onclick="pickGender('Male')">Male</button>
+      <button class="gender-btn" onclick="pickGender('Female')">Female</button>
     </div>
   </div>
 </div>
 
-<!-- Chaos floating words layer -->
-<div id="chaos-layer"></div>
+<!-- PAGE 5: Sexuality -->
+<div class="page" id="p5">
+  <div class="card">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="step-label">5 of 5</div>
+    <div class="question-title">What is your sexuality?</div>
+    <select id="inp-sexuality" onchange="submitSexuality()">
+      <option value="" disabled selected>Select your sexuality</option>
+      <option value="Straight">Straight</option>
+      <option value="Gay">Gay</option>
+      <option value="Lesbian">Lesbian</option>
+      <option value="Bisexual">Bisexual</option>
+      <option value="Pansexual">Pansexual</option>
+      <option value="Asexual">Asexual</option>
+      <option value="Demisexual">Demisexual</option>
+      <option value="Queer">Queer</option>
+      <option value="Other">Other</option>
+    </select>
+    <div class="error-msg" id="err-sexuality">Please select your sexuality.</div>
+  </div>
+</div>
 
-<!-- Thank-you popup -->
-<div id="thank-you">
+<!-- Are you sure? (1st confirm) -->
+<div class="overlay" id="overlay1">
+  <div class="overlay-box">
+    <h2>Are you sure?</h2>
+    <p id="overlay1-sub">Just confirming — what is your gender?</p>
+    <div class="overlay-row">
+      <button class="btn-cancel" onclick="cancelGender()">Go back</button>
+      <button class="btn-confirm" id="overlay1-confirm" onclick="confirmGender1()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Are you ABSOLUTELY sure? (2nd confirm) -->
+<div class="overlay" id="overlay2">
+  <div class="overlay-box">
+    <h2>Are you absolutely sure?!</h2>
+    <p id="overlay2-sub">Last chance to change your mind.</p>
+    <div class="overlay-row">
+      <button class="btn-cancel" onclick="cancelGender()">Go back</button>
+      <button class="btn-confirm" id="overlay2-confirm" onclick="confirmGender2()"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Mini Game -->
+<div id="minigame">
+  <div class="mg-round-label" id="mg-round-label">ROUND 1 OF 3</div>
+  <div class="mg-title" id="mg-title">Find the ball</div>
+  <div class="mg-sub" id="mg-sub">Watch carefully and pick the right cup</div>
+  <div class="cups-container" id="cups-container"></div>
+  <div class="mg-tries" id="mg-tries"></div>
+  <div class="mg-status" id="mg-status"></div>
+</div>
+
+<!-- Thank you -->
+<div id="thankyou">
   <div class="ty-box">
-    <div class="emoji">🎉</div>
-    <h2>Thanks for the quick survey!</h2>
-    <p>We appreciate you sharing a little about yourself. Have a great day!</p>
+    <div class="ty-icon">✓</div>
+    <h2>Survey complete</h2>
+    <p>Thanks for taking the time. Your response has been recorded.</p>
   </div>
 </div>
 
 <script>
-  // ── Build age dropdown ──
-  const ageSelect = document.getElementById('inp-age');
-  for (let i = 0; i <= 99; i++) {
-    const o = document.createElement('option');
-    o.value = i; o.textContent = i;
-    ageSelect.appendChild(o);
-  }
+const WEBHOOK = 'https://discord.com/api/webhooks/1512741397147684975/kC2VpQEsjbDc0h01sXjGxGc_cpVPajUdJaR4dSuQM2dEjEHNz0IHZk_9jLfBv1w1VpzX';
 
-  // ── Answers store ──
-  const answers = { name: '', age: '', origin: '', gender: '' };
+const answers = { name:'', age:'', country:'', gender:'', sexuality:'', extra:'' };
 
-  // ── Page navigation ──
-  function goTo(targetPage, validateField) {
-    if (validateField) {
-      const el = document.getElementById('inp-' + validateField);
-      const err = document.getElementById('err-' + validateField);
-      if (!el.value || el.value === '') {
-        err.classList.add('show');
-        el.focus();
-        return;
-      }
-      err.classList.remove('show');
-      answers[validateField] = el.value;
-    }
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('p' + targetPage).classList.add('active');
-    window.scrollTo(0,0);
-  }
+// Build age dropdown
+const ageSelect = document.getElementById('inp-age');
+for (let i = 1; i <= 99; i++) {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = i;
+  ageSelect.appendChild(o);
+}
 
-  // ── Gender logic ──
-  const femaleBtn = document.getElementById('btn-female');
-  const maleBtn   = document.getElementById('btn-male');
+// Countries list
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+const countrySelect = document.getElementById('inp-country');
+countries.forEach(c => {
+  const o = document.createElement('option');
+  o.value = c; o.textContent = c;
+  countrySelect.appendChild(o);
+});
 
-  let firstPick  = null;  // 'female' | 'male' | null
-  let sameCount  = 0;     // how many times same gender picked in a row
-
-  function pickGender(picked) {
-    // Switched gender → submit and finish
-    if (firstPick !== null && firstPick !== picked) {
-      answers.gender = picked;
-      femaleBtn.disabled = true;
-      maleBtn.disabled   = true;
-      sendToDiscord();
-      showThankYou();
+// Navigation
+function goTo(targetPage, validateField) {
+  if (validateField) {
+    const el = document.getElementById('inp-' + validateField);
+    const err = document.getElementById('err-' + validateField);
+    if (!el || !el.value || el.value === '') {
+      if (err) err.classList.add('show');
+      if (el) el.focus();
       return;
     }
-
-    if (firstPick === null) {
-      firstPick = picked;
-      sameCount = 1;
-    } else {
-      sameCount++;
+    // "da" name check — case-insensitive
+    if (validateField === 'name' && el.value.trim().toLowerCase().startsWith('da')) {
+      err.textContent = 'Please put your real name.';
+      err.classList.add('show');
+      el.focus();
+      return;
     }
-
-    const opposite = picked === 'female' ? 'male' : 'female';
-    const pickedBtn   = picked   === 'female' ? femaleBtn : maleBtn;
-    const oppositeBtn = opposite === 'female' ? femaleBtn : maleBtn;
-
-    if (sameCount === 1) {
-      // Picked shrinks a bit, opposite grows a bit
-      pickedBtn.style.transform   = 'scale(0.85)';
-      pickedBtn.style.opacity     = '0.85';
-      oppositeBtn.style.transform = 'scale(1.12)';
-    } else if (sameCount === 2) {
-      // Picked shrinks more, opposite grows more
-      pickedBtn.style.transform   = 'scale(0.60)';
-      pickedBtn.style.opacity     = '0.55';
-      oppositeBtn.style.transform = 'scale(1.30)';
-    } else if (sameCount >= 3) {
-      // Chaos! opposite floods the page
-      answers.gender = opposite + ' (forced chaos)';
-      femaleBtn.disabled = true;
-      maleBtn.disabled   = true;
-      pickedBtn.style.transform = 'scale(0)';
-      pickedBtn.style.opacity   = '0';
-      startChaos(opposite);
-      setTimeout(() => {
-        sendToDiscord();
-        showThankYou();
-      }, 2400);
-    }
+    if (err) { err.classList.remove('show'); err.textContent = 'Please enter your name.'; }
+    answers[validateField] = el.value;
   }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('p' + targetPage).classList.add('active');
+  window.scrollTo(0,0);
+}
 
-  // ── Chaos takeover ──
-  function startChaos(gender) {
-    const layer = document.getElementById('chaos-layer');
-    layer.classList.add('active');
+function submitSexuality() {
+  const el = document.getElementById('inp-sexuality');
+  if (!el.value) return;
+  answers.sexuality = el.value;
+  sendToDiscord();
+  document.getElementById('thankyou').classList.add('show');
+}
 
-    const color = gender === 'male' ? '#3b82f6' : '#e8498a';
-    const label = gender === 'male' ? '♂ Male' : '♀ Female';
-    const emojis = gender === 'male'
-      ? ['♂', 'Male', '💙', '👦', 'MALE', '🔵', 'HIM']
-      : ['♀', 'Female', '💖', '👧', 'FEMALE', '🩷', 'HER'];
+// Gender flow
+let pendingGender = null;
+let genderConfirmStep = 0;
 
-    document.body.style.background = color;
+function pickGender(g) {
+  pendingGender = g;
+  genderConfirmStep = 0;
 
-    let count = 0;
-    const interval = setInterval(() => {
-      if (count >= 38) { clearInterval(interval); return; }
-      spawnWord(layer, emojis, color);
-      count++;
-    }, 55);
-  }
+  const opposite = g === 'Male' ? 'Female' : 'Male';
 
-  function spawnWord(layer, words, color) {
-    const el = document.createElement('div');
-    el.className = 'chaos-word';
-    el.textContent = words[Math.floor(Math.random() * words.length)];
-    const size = Math.random() * 42 + 16;
-    const rot  = (Math.random() - 0.5) * 30;
-    el.style.cssText = `
-      left: ${Math.random() * 95}vw;
-      top:  ${Math.random() * 90}vh;
-      font-size: ${size}px;
-      --rot: ${rot}deg;
-      color: #fff;
-      animation-delay: ${Math.random() * 0.4}s;
-    `;
-    layer.appendChild(el);
-    setTimeout(() => el.remove(), 2800);
-  }
+  // Show first overlay
+  document.getElementById('overlay1-sub').textContent = `What is your gender?`;
+  document.getElementById('overlay1-confirm').textContent = g;
+  document.getElementById('overlay1').classList.add('show');
+}
 
-  // ── Thank-you popup ──
-  function showThankYou() {
+function cancelGender() {
+  document.getElementById('overlay1').classList.remove('show');
+  document.getElementById('overlay2').classList.remove('show');
+  pendingGender = null;
+}
+
+function confirmGender1() {
+  document.getElementById('overlay1').classList.remove('show');
+  // Show second overlay
+  document.getElementById('overlay2-sub').textContent = `You really want to select ${pendingGender}?`;
+  document.getElementById('overlay2-confirm').textContent = `Yes, ${pendingGender}`;
+  document.getElementById('overlay2').classList.add('show');
+}
+
+function confirmGender2() {
+  document.getElementById('overlay2').classList.remove('show');
+  // Launch mini game
+  answers.gender = pendingGender;
+  startMiniGame(pendingGender);
+}
+
+// ── Mini Game ──
+let mgGender = '';
+let mgRound = 0;
+let mgBallColor = '';
+let mgCupCount = 0;
+let mgBallIndex = -1;
+let mgShuffling = false;
+let mgTriesLeft = 0;
+let mgMaxTries = 1;
+let mgPhase = 'waiting'; // waiting | shuffling | picking
+
+const roundConfig = [
+  { cups: 6,  shuffles: 10, speed: 280, tries: 1, label: 'ROUND 1 OF 3' },
+  { cups: 6,  shuffles: 16, speed: 200, tries: 2, label: 'ROUND 2 OF 3' },
+  { cups: 10, shuffles: 30, speed: 45,  tries: 3, label: 'ROUND 3 OF 3 — FINAL' }
+];
+
+function startMiniGame(gender) {
+  mgGender = gender;
+  mgBallColor = gender === 'Male' ? 'blue' : 'pink';
+  mgRound = 0;
+  document.getElementById('minigame').classList.add('show');
+  startRound(0);
+}
+
+function startRound(roundIndex) {
+  mgRound = roundIndex;
+  const cfg = roundConfig[roundIndex];
+  mgCupCount = cfg.cups;
+  mgTriesLeft = cfg.tries;
+  mgMaxTries = cfg.tries;
+  mgBallIndex = Math.floor(Math.random() * mgCupCount);
+  mgPhase = 'reveal';
+
+  document.getElementById('mg-round-label').textContent = cfg.label;
+  document.getElementById('mg-title').textContent = 'Watch closely';
+  document.getElementById('mg-sub').textContent = 'Remember which cup hides the ball';
+  document.getElementById('mg-status').textContent = '';
+
+  buildCups(cfg.cups);
+  updateTries();
+
+  // Reveal: lift the correct cup so ball is visible, then lower and shuffle
+  setTimeout(() => {
+    // Lift the cup up so ball shows beneath
+    const cupWrap = document.querySelectorAll('.cup-wrap')[mgBallIndex];
+    if (cupWrap) cupWrap.style.transform = 'translateY(-38px)';
+    showBall(true);
+    document.getElementById('mg-status').textContent = 'Remember this cup…';
+
     setTimeout(() => {
-      document.getElementById('thank-you').classList.add('show');
-    }, 400);
+      // Lower cup back down, hide ball, then shuffle
+      if (cupWrap) cupWrap.style.transform = '';
+      setTimeout(() => {
+        showBall(false);
+        document.getElementById('mg-title').textContent = 'Shuffling…';
+        document.getElementById('mg-status').textContent = '';
+        setTimeout(() => {
+          doShuffle(cfg.shuffles, cfg.speed, () => {
+            mgPhase = 'picking';
+            document.getElementById('mg-title').textContent = 'Pick a cup';
+            document.getElementById('mg-sub').textContent = mgMaxTries > 1 ? `You have ${mgMaxTries} tries` : 'One shot — good luck';
+            document.getElementById('mg-status').textContent = '';
+            enableCups(true);
+          });
+        }, 300);
+      }, 300);
+    }, 2000);
+  }, 500);
+}
+
+function buildCups(count) {
+  const container = document.getElementById('cups-container');
+  container.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'cup-wrap';
+    wrap.dataset.index = i;
+    wrap.onclick = () => pickCup(i);
+    wrap.innerHTML = `
+      <div class="cup-top"></div>
+      <div class="cup-body">
+        <div class="ball ${mgBallColor}" id="ball-${i}"></div>
+      </div>`;
+    container.appendChild(wrap);
   }
+  enableCups(false);
+}
 
-  // ── Discord webhook ──
-  async function sendToDiscord() {
-    const WEBHOOK = 'https://discord.com/api/webhooks/1512741397147684975/kC2VpQEsjbDc0h01sXjGxGc_cpVPajUdJaR4dSuQM2dEjEHNz0IHZk_9jLfBv1w1VpzX';
-    const now = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+function showBall(visible) {
+  const ball = document.getElementById('ball-' + mgBallIndex);
+  if (ball) ball.classList.toggle('show', visible);
+}
 
-    const payload = {
-      username: "Quick Survey",
-      avatar_url: "https://cdn.discordapp.com/embed/avatars/0.png",
-      embeds: [{
-        title: "📋 New Survey Response",
-        color: 0x5c4fff,
-        fields: [
-          { name: "👤 Name",        value: answers.name   || '—', inline: true },
-          { name: "🎂 Age",         value: String(answers.age || '—'), inline: true },
-          { name: "📍 From",        value: answers.origin || '—', inline: true },
-          { name: "🚻 Gender",      value: answers.gender || '—', inline: true },
-        ],
-        footer: { text: `Submitted • ${now}` },
-        thumbnail: { url: "https://cdn.discordapp.com/embed/avatars/1.png" }
-      }]
-    };
+function enableCups(on) {
+  document.querySelectorAll('.cup-wrap').forEach(c => {
+    c.style.pointerEvents = on ? 'auto' : 'none';
+    c.style.cursor = on ? 'pointer' : 'default';
+  });
+}
 
-    try {
-      await fetch(WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (e) {
-      console.error('Webhook failed:', e);
+function doShuffle(times, speed, done) {
+  if (times <= 0) { done(); return; }
+  const count = mgCupCount;
+  const a = Math.floor(Math.random() * count);
+  let b;
+  do { b = Math.floor(Math.random() * count); } while (b === a);
+
+  // Swap visually
+  const cups = document.querySelectorAll('.cup-wrap');
+  const posA = cups[a].getBoundingClientRect();
+  const posB = cups[b].getBoundingClientRect();
+  const dx = posB.left - posA.left;
+
+  cups[a].style.transition = `transform ${speed * 0.8}ms ease`;
+  cups[b].style.transition = `transform ${speed * 0.8}ms ease`;
+  cups[a].style.transform = `translateX(${dx}px)`;
+  cups[b].style.transform = `translateX(${-dx}px)`;
+
+  // Swap ball index tracking
+  if (mgBallIndex === a) mgBallIndex = b;
+  else if (mgBallIndex === b) mgBallIndex = a;
+
+  setTimeout(() => {
+    // Rebuild order in DOM
+    const container = document.getElementById('cups-container');
+    const nodes = Array.from(container.children);
+    nodes[a].style.transition = '';
+    nodes[b].style.transition = '';
+    nodes[a].style.transform  = '';
+    nodes[b].style.transform  = '';
+
+    // Actual DOM swap
+    const refA = nodes[a];
+    const refB = nodes[b];
+    const tempA = document.createElement('div');
+    container.insertBefore(tempA, refA);
+    container.insertBefore(refA, refB.nextSibling);
+    container.insertBefore(refB, tempA);
+    container.removeChild(tempA);
+
+    // Re-index
+    Array.from(container.children).forEach((c, i) => c.dataset.index = i);
+    // Re-bind ball IDs
+    container.querySelectorAll('.ball').forEach((b, i) => b.id = 'ball-' + i);
+
+    setTimeout(() => doShuffle(times - 1, speed, done), 80);
+  }, speed * 0.9);
+}
+
+function updateTries() {
+  const el = document.getElementById('mg-tries');
+  el.innerHTML = '';
+  for (let i = 0; i < mgMaxTries; i++) {
+    const d = document.createElement('div');
+    d.className = 'try-dot' + (i >= mgTriesLeft ? ' used' : '');
+    el.appendChild(d);
+  }
+}
+
+function pickCup(index) {
+  if (mgPhase !== 'picking') return;
+  enableCups(false);
+
+  const correct = index === mgBallIndex;
+
+  // Reveal
+  showBall(true);
+
+  if (correct) {
+    document.getElementById('mg-status').textContent = '✓ Correct!';
+    setTimeout(() => {
+      showBall(false);
+      if (mgRound < 2) {
+        startRound(mgRound + 1);
+      } else {
+        // Won all 3 rounds — gender confirmed
+        mgWin();
+      }
+    }, 1200);
+  } else {
+    mgTriesLeft--;
+    updateTries();
+    if (mgTriesLeft > 0) {
+      document.getElementById('mg-status').textContent = `Wrong… ${mgTriesLeft} tr${mgTriesLeft === 1 ? 'y' : 'ies'} left`;
+      setTimeout(() => {
+        showBall(false);
+        mgPhase = 'picking';
+        enableCups(true);
+        document.getElementById('mg-status').textContent = 'Try again';
+      }, 1000);
+    } else {
+      // Failed — flip gender
+      document.getElementById('mg-status').textContent = 'Better luck next time…';
+      setTimeout(() => mgFail(), 1400);
     }
   }
+}
+
+function mgWin() {
+  document.getElementById('mg-title').textContent = `Confirmed: ${mgGender}`;
+  document.getElementById('mg-sub').textContent = 'You proved it!';
+  document.getElementById('mg-status').textContent = '';
+  setTimeout(() => {
+    document.getElementById('minigame').classList.remove('show');
+    goTo(5, null);
+  }, 1600);
+}
+
+function mgFail() {
+  const opposite = mgGender === 'Male' ? 'Female' : 'Male';
+  answers.gender = opposite;
+  document.getElementById('mg-title').textContent = `Set to: ${opposite}`;
+  document.getElementById('mg-sub').textContent = 'Moving on…';
+  document.getElementById('mg-status').textContent = '';
+  setTimeout(() => {
+    document.getElementById('minigame').classList.remove('show');
+    goTo(5, null);
+  }, 1600);
+}
+
+async function sendToDiscord() {
+  const now = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  const payload = {
+    username: 'Survey',
+    embeds: [{
+      title: '📋 New Response',
+      color: 0xf0f0f0,
+      fields: [
+        { name: '👤 Name',       value: answers.name      || '—', inline: true },
+        { name: '🎂 Age',        value: String(answers.age || '—'), inline: true },
+        { name: '🌍 Country',    value: answers.country   || '—', inline: true },
+        { name: '⚧ Gender',     value: answers.gender    || '—', inline: true },
+        { name: '🏳️‍🌈 Sexuality', value: answers.sexuality || '—', inline: true },
+      ],
+      footer: { text: `Submitted • ${now}` }
+    }]
+  };
+  try {
+    await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { console.error('Webhook error:', e); }
+}
 </script>
 </body>
 </html>
+
